@@ -2,6 +2,7 @@ use std::sync::Mutex;
 use tauri::{
     image::Image,
     menu::{Menu, MenuItem},
+    path::BaseDirectory,
     tray::TrayIconBuilder,
     AppHandle, Manager, Runtime,
 };
@@ -46,7 +47,7 @@ pub fn build_tray<R: Runtime>(app: &AppHandle<R>) -> Result<(), Box<dyn std::err
         &[&show_hide, &reload, &check_updates, &auth_toggle, &quit],
     )?;
 
-    let icon = load_tray_icon(TrayIconState::Normal)?;
+    let icon = load_tray_icon(app, TrayIconState::Normal)?;
 
     let _tray = TrayIconBuilder::with_id("main")
         .icon(icon)
@@ -150,12 +151,19 @@ fn build_tray_menu<R: Runtime>(app: &AppHandle<R>, auth_mode: bool) -> Menu<R> {
     Menu::with_items(app, &[&show_hide, &reload, &check_updates, &auth_toggle, &quit]).unwrap()
 }
 
-fn load_tray_icon(state: TrayIconState) -> Result<Image<'static>, Box<dyn std::error::Error>> {
-    let icon_path = match state {
-        TrayIconState::Normal => "icons/default/normal.png",
-        TrayIconState::Badge => "icons/default/badge.png",
-        TrayIconState::Offline => "icons/default/offline.png",
+fn load_tray_icon<R: Runtime>(
+    app: &AppHandle<R>,
+    state: TrayIconState,
+) -> Result<Image<'static>, Box<dyn std::error::Error>> {
+    let icon_name = match state {
+        TrayIconState::Normal => "normal.png",
+        TrayIconState::Badge => "badge.png",
+        TrayIconState::Offline => "offline.png",
     };
+
+    let icon_path = app
+        .path()
+        .resolve(format!("icons/default/{}", icon_name), BaseDirectory::Resource)?;
 
     Image::from_path(icon_path).map_err(Into::into)
 }
@@ -165,7 +173,7 @@ pub fn update_tray_icon<R: Runtime>(
     state: TrayIconState,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let tray = app.tray_by_id("main").ok_or("Tray not found")?;
-    let icon = load_tray_icon(state)?;
+    let icon = load_tray_icon(app, state)?;
     tray.set_icon(Some(icon))?;
     Ok(())
 }
