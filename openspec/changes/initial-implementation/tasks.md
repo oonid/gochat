@@ -1,10 +1,10 @@
 ## 1. Project Setup
 
-- [ ] 1.1 Initialize Tauri v2 project with `pnpm create tauri-app`
-- [ ] 1.2 Configure TypeScript and Vite for minimal frontend
-- [ ] 1.3 Set up Rust toolchain and verify Tauri CLI works
-- [ ] 1.4 Create initial `tauri.conf.json` with window and bundle settings
-- [ ] 1.5 Set up `.gitignore` and initial commit
+- [x] 1.1 Initialize Tauri v2 project with `pnpm create tauri-app` (manually created structure)
+- [x] 1.2 Configure TypeScript and Vite for minimal frontend
+- [x] 1.3 Set up Rust toolchain and verify Tauri CLI works
+- [x] 1.4 Create initial `tauri.conf.json` with window and bundle settings
+- [x] 1.5 Set up `.gitignore` and initial commit
 
 ## 2. Core Window and WebView
 

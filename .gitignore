@@ -1,3 +1,15 @@
-/target
+# AI/IDE
 /.opencode
 /.idea
+
+# Node
+node_modules/
+.pnpm-store/
+dist/
+
+# Rust/Tauri
+target/
+src-tauri/target/
+
+# Build artifacts
+*.log
