@@ -28,6 +28,8 @@ fn create_splash_window(app: &tauri::AppHandle) -> tauri::WebviewWindow {
 }
 
 fn main() {
+    config::create_custom_css_template();
+
     let config = config::load_config();
     let initial_bounds = config.bounds.clone();
     let start_maximized = config.maximized;
@@ -132,6 +134,10 @@ fn main() {
             
             let favicon_script = injection::get_favicon_monitor_script();
             let notification_script = injection::get_notification_script();
+            let custom_css = config::load_custom_css();
+            let custom_css_script = custom_css
+                .as_ref()
+                .map(|css| injection::get_css_injection_script(css));
             
             let mut window_builder = WebviewWindowBuilder::new(
                 app,
@@ -150,10 +156,15 @@ fn main() {
             }
 
             let start_hidden_clone = start_hidden;
+            let custom_css_script_clone = custom_css_script.clone();
             window_builder
                 .on_page_load(move |window, _payload| {
                     let _ = window.eval(&favicon_script);
                     let _ = window.eval(&notification_script);
+                    
+                    if let Some(css_script) = &custom_css_script_clone {
+                        let _ = window.eval(css_script);
+                    }
                     
                     if !start_hidden_clone {
                         let _ = window.show();

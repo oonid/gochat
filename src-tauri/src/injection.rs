@@ -209,3 +209,38 @@ pub fn get_favicon_monitor_script() -> String {
 })();
 "#.to_string()
 }
+
+pub fn get_css_injection_script(css: &str) -> String {
+    let escaped_css = css
+        .replace('\\', "\\\\")
+        .replace('`', "\\`")
+        .replace('$', "\\$");
+
+    format!(
+        r#"
+(function() {{
+    if (window.__gochatCustomCSS) return;
+    window.__gochatCustomCSS = true;
+    
+    try {{
+        const style = document.createElement('style');
+        style.id = 'gochat-custom-css';
+        style.textContent = `{}`;
+        
+        if (document.head) {{
+            document.head.appendChild(style);
+        }} else {{
+            document.addEventListener('DOMContentLoaded', function() {{
+                document.head.appendChild(style);
+            }});
+        }}
+        
+        console.log('GoChat: Custom CSS injected successfully');
+    }} catch (e) {{
+        console.error('GoChat: Failed to inject custom CSS:', e);
+    }}
+}})();
+"#,
+        escaped_css
+    )
+}

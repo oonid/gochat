@@ -3,6 +3,33 @@ use std::fs;
 use std::path::PathBuf;
 use tauri::Manager;
 
+const MIN_WINDOW_WIDTH: u32 = 400;
+const MIN_WINDOW_HEIGHT: u32 = 300;
+const MAX_WINDOW_WIDTH: u32 = 3840;
+const MAX_WINDOW_HEIGHT: u32 = 2160;
+const VALID_ICON_THEMES: &[&str] = &["default", "colored", "mono"];
+
+const CUSTOM_CSS_TEMPLATE: &str = r#"/* GoChat Custom CSS
+ * 
+ * This file allows you to customize the appearance of Google Chat.
+ * Edit this file and reload the app to see your changes.
+ * 
+ * Example customizations:
+ */
+
+/* Darker sidebar 
+body {
+  --sidebar-bg: #1a1a1a !important;
+}
+*/
+
+/* Hide specific elements
+ selector {
+  display: none !important;
+}
+*/
+"#;
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct WindowBounds {
     pub x: i32,
@@ -121,4 +148,60 @@ pub fn save_window_state<R: tauri::Runtime>(app: &tauri::AppHandle<R>, config: &
     }
 
     save_config(config);
+}
+
+pub fn get_config_dir() -> PathBuf {
+    dirs::config_dir()
+        .unwrap_or_else(|| PathBuf::from("."))
+        .join("gochat")
+}
+
+pub fn ensure_config_dir() -> PathBuf {
+    let config_dir = get_config_dir();
+
+    if !config_dir.exists() {
+        if let Err(e) = fs::create_dir_all(&config_dir) {
+            eprintln!("Failed to create config directory: {}", e);
+        }
+    }
+
+    config_dir
+}
+
+pub fn get_custom_css_path() -> PathBuf {
+    ensure_config_dir().join("custom.css")
+}
+
+pub fn load_custom_css() -> Option<String> {
+    let css_path = get_custom_css_path();
+
+    if css_path.exists() {
+        match fs::read_to_string(&css_path) {
+            Ok(css) => {
+                if css.trim().is_empty() {
+                    None
+                } else {
+                    Some(css)
+                }
+            }
+            Err(e) => {
+                eprintln!("Failed to read custom.css: {}", e);
+                None
+            }
+        }
+    } else {
+        None
+    }
+}
+
+pub fn create_custom_css_template() {
+    let css_path = get_custom_css_path();
+
+    if !css_path.exists() {
+        if let Err(e) = fs::write(&css_path, CUSTOM_CSS_TEMPLATE) {
+            eprintln!("Failed to create custom.css template: {}", e);
+        } else {
+            println!("Created custom.css template at {:?}", css_path);
+        }
+    }
 }

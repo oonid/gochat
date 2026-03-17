@@ -64,11 +64,11 @@
 
 ## 9. Custom CSS Injection
 
-- [ ] 9.1 Create config directory structure if not exists
-- [ ] 9.2 Load custom.css from config directory
-- [ ] 9.3 Inject CSS into webview after page load
-- [ ] 9.4 Create template custom.css file on first run
-- [ ] 9.5 Handle CSS injection errors gracefully
+- [x] 9.1 Create config directory structure if not exists
+- [x] 9.2 Load custom.css from config directory
+- [x] 9.3 Inject CSS into webview after page load
+- [x] 9.4 Create template custom.css file on first run
+- [x] 9.5 Handle CSS injection errors gracefully
 
 ## 10. Configuration System
 
