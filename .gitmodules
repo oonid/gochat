@@ -1,0 +1,9 @@
+[submodule "vendor/google-chat-tauri"]
+	path = vendor/google-chat-tauri
+	url = https://github.com/ThatOneCalculator/google-chat-tauri.git
+[submodule "vendor/google-chat-linux"]
+	path = vendor/google-chat-linux
+	url = https://github.com/squalou/google-chat-linux.git
+[submodule "vendor/google-chat-electron"]
+	path = vendor/google-chat-electron
+	url = https://github.com/ankurk91/google-chat-electron.git
