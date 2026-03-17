@@ -5,6 +5,7 @@ mod config;
 mod injection;
 mod navigation;
 mod tray;
+mod updater;
 
 use std::sync::Mutex;
 
@@ -48,6 +49,7 @@ fn main() {
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_persisted_scope::init())
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .manage(Mutex::new(config))
         .on_window_event(move |window, event| {
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {
@@ -67,6 +69,19 @@ fn main() {
         })
         .setup(move |app| {
             tray::build_tray(app.handle())?;
+            
+            let auto_update_enabled = {
+                let config_state = app.state::<Mutex<config::Config>>();
+                let cfg = config_state.lock().unwrap();
+                cfg.auto_update
+            };
+            
+            if auto_update_enabled {
+                let app_handle = app.handle().clone();
+                tauri::async_runtime::spawn(async move {
+                    let _ = updater::check_for_updates(&app_handle, true).await;
+                });
+            }
             
             let app_handle = app.handle().clone();
             app.listen("favicon-changed", move |event: Event| {

@@ -7,6 +7,7 @@ use tauri::{
 };
 
 use crate::config;
+use crate::updater;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum TrayIconState {
@@ -21,6 +22,13 @@ pub fn build_tray<R: Runtime>(app: &AppHandle<R>) -> Result<(), Box<dyn std::err
 
     let show_hide = MenuItem::with_id(app, "show_hide", "Show", true, None::<&str>)?;
     let reload = MenuItem::with_id(app, "reload", "Reload", true, None::<&str>)?;
+    let check_updates = MenuItem::with_id(
+        app,
+        "check_updates",
+        "Check for Updates",
+        true,
+        None::<&str>,
+    )?;
     let auth_toggle = MenuItem::with_id(
         app,
         "auth_toggle",
@@ -33,7 +41,10 @@ pub fn build_tray<R: Runtime>(app: &AppHandle<R>) -> Result<(), Box<dyn std::err
     )?;
     let quit = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
 
-    let menu = Menu::with_items(app, &[&show_hide, &reload, &auth_toggle, &quit])?;
+    let menu = Menu::with_items(
+        app,
+        &[&show_hide, &reload, &check_updates, &auth_toggle, &quit],
+    )?;
 
     let icon = load_tray_icon(TrayIconState::Normal)?;
 
@@ -55,6 +66,24 @@ pub fn build_tray<R: Runtime>(app: &AppHandle<R>) -> Result<(), Box<dyn std::err
                 if let Some(window) = app.get_webview_window("main") {
                     let _ = window.eval("window.location.reload()");
                 }
+            }
+            "check_updates" => {
+                let app_handle = app.clone();
+                tauri::async_runtime::spawn(async move {
+                    match updater::check_for_updates(&app_handle, false).await {
+                        Ok(true) => {
+                            if let Err(e) = updater::download_and_install(&app_handle).await {
+                                eprintln!("Failed to install update: {}", e);
+                            }
+                        }
+                        Ok(false) => {
+                            eprintln!("App is up to date");
+                        }
+                        Err(e) => {
+                            eprintln!("Update check failed: {}", e);
+                        }
+                    }
+                });
             }
             "auth_toggle" => {
                 toggle_auth_mode(app);
@@ -107,6 +136,7 @@ fn toggle_auth_mode<R: Runtime>(app: &AppHandle<R>) {
 fn build_tray_menu<R: Runtime>(app: &AppHandle<R>, auth_mode: bool) -> Menu<R> {
     let show_hide = MenuItem::with_id(app, "show_hide", "Show", true, None::<&str>).unwrap();
     let reload = MenuItem::with_id(app, "reload", "Reload", true, None::<&str>).unwrap();
+    let check_updates = MenuItem::with_id(app, "check_updates", "Check for Updates", true, None::<&str>).unwrap();
     let auth_toggle = MenuItem::with_id(
         app,
         "auth_toggle",
@@ -117,7 +147,7 @@ fn build_tray_menu<R: Runtime>(app: &AppHandle<R>, auth_mode: bool) -> Menu<R> {
     .unwrap();
     let quit = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>).unwrap();
 
-    Menu::with_items(app, &[&show_hide, &reload, &auth_toggle, &quit]).unwrap()
+    Menu::with_items(app, &[&show_hide, &reload, &check_updates, &auth_toggle, &quit]).unwrap()
 }
 
 fn load_tray_icon(state: TrayIconState) -> Result<Image<'static>, Box<dyn std::error::Error>> {

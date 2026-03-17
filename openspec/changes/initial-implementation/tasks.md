@@ -80,11 +80,11 @@
 
 ## 11. Auto-Update
 
-- [ ] 11.1 Configure Tauri updater with GitHub releases endpoint
-- [ ] 11.2 Generate signing keys for updates
-- [ ] 11.3 Implement update check on startup
-- [ ] 11.4 Add manual update check option in menu
-- [ ] 11.5 Handle update download and installation prompt
+- [x] 11.1 Configure Tauri updater with GitHub releases endpoint
+- [x] 11.2 Generate signing keys for updates
+- [x] 11.3 Implement update check on startup
+- [x] 11.4 Add manual update check option in menu
+- [x] 11.5 Handle update download and installation prompt
 
 ## 12. Deep Link Protocol
 
