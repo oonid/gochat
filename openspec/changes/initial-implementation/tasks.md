@@ -103,8 +103,8 @@
 
 ## 14. Documentation and Polish
 
-- [ ] 14.1 Write README with installation instructions
-- [ ] 14.2 Document configuration options
-- [ ] 14.3 Add LICENSE file
-- [ ] 14.4 Create app icons for all platforms
-- [ ] 14.5 Final testing and bug fixes
+- [x] 14.1 Write README with installation instructions
+- [x] 14.2 Document configuration options
+- [x] 14.3 Add LICENSE file
+- [x] 14.4 Create app icons for all platforms
+- [x] 14.5 Final testing and bug fixes
