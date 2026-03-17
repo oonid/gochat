@@ -165,6 +165,7 @@ fn main() {
             .inner_size(initial_bounds.width as f64, initial_bounds.height as f64)
             .resizable(true)
             .visible(false)
+            .devtools(true)
             .user_agent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
 
             if start_maximized {
@@ -173,10 +174,22 @@ fn main() {
 
             let start_hidden_clone = start_hidden;
             let custom_css_script_clone = custom_css_script.clone();
+            let error_logging_script = r#"
+(function() {
+    window.addEventListener('error', function(e) {
+        console.error('[GOCHAT JS ERROR]', e.message, e.filename, e.lineno);
+    });
+    window.addEventListener('unhandledrejection', function(e) {
+        console.error('[GOCHAT PROMISE ERROR]', e.reason);
+    });
+})();
+"#.to_string();
+            
             window_builder
                 .on_page_load(move |window, payload| {
                     eprintln!("[DEBUG] Page loaded: {}", payload.url());
                     
+                    let _ = window.eval(&error_logging_script);
                     let _ = window.eval(&favicon_script);
                     let _ = window.eval(&notification_script);
                     
