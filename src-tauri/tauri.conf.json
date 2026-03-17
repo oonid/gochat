@@ -41,6 +41,14 @@
     "updater": {
       "endpoints": ["https://github.com/oonid/gochat/releases/latest/download/{{target}}-{{arch}}.json"],
       "pubkey": "RWRoQDbnXS+chrbwZ6HsVkQ6LTENIOJFsaFhOaKfkvnrGu1FMs9PChy2"
+    },
+    "deep-link": {
+      "desktop": {
+        "schemes": ["gchat"]
+      },
+      "mobile": {
+        "schemes": ["gchat"]
+      }
     }
   }
 }

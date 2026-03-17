@@ -50,6 +50,7 @@ fn main() {
         .plugin(tauri_plugin_persisted_scope::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_deep_link::init())
         .manage(Mutex::new(config))
         .on_window_event(move |window, event| {
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {

@@ -88,10 +88,10 @@
 
 ## 12. Deep Link Protocol
 
-- [ ] 12.1 Register `gchat://` protocol handler
-- [ ] 12.2 Convert `gchat://` URLs to `https://` for navigation
-- [ ] 12.3 Handle incoming deep links from OS
-- [ ] 12.4 Configure .desktop file (Linux), Info.plist (macOS), registry (Windows)
+- [x] 12.1 Register `gchat://` protocol handler
+- [x] 12.2 Convert `gchat://` URLs to `https://` for navigation
+- [x] 12.3 Handle incoming deep links from OS
+- [x] 12.4 Configure .desktop file (Linux), Info.plist (macOS), registry (Windows)
 
 ## 13. Cross-Platform Build
 
