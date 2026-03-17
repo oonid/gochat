@@ -1,7 +1,10 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod config;
 mod injection;
 mod tray;
+
+use std::sync::Mutex;
 
 use tauri::{Event, Listener, Manager, WebviewUrl, WebviewWindowBuilder};
 use tauri_plugin_notification::NotificationExt;
@@ -32,18 +35,41 @@ fn create_splash_window(app: &tauri::AppHandle) -> tauri::WebviewWindow {
 }
 
 fn main() {
+    let config = config::load_config();
+    let initial_bounds = config.bounds.clone();
+    let start_maximized = config.maximized;
+    let start_hidden = config.start_hidden;
+
     tauri::Builder::default()
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
             if let Some(window) = app.get_webview_window("main") {
-                let _ = window.set_focus();
+                let _ = window.unminimize();
                 let _ = window.show();
+                let _ = window.set_focus();
             }
         }))
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_persisted_scope::init())
         .plugin(tauri_plugin_opener::init())
-        .setup(|app| {
+        .manage(Mutex::new(config))
+        .on_window_event(move |window, event| {
+            if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+                let app = window.app_handle();
+                
+                {
+                    let config_state = app.state::<Mutex<config::Config>>();
+                    let mut cfg = config_state.lock().unwrap();
+                    config::save_window_state(app, &mut cfg);
+                }
+                
+                if cfg!(not(target_os = "macos")) {
+                    let _ = window.hide();
+                    api.prevent_close();
+                }
+            }
+        })
+        .setup(move |app| {
             tray::build_tray(app.handle())?;
             
             let app_handle = app.handle().clone();
@@ -102,39 +128,58 @@ fn main() {
                 }
             });
             
-            let splash = create_splash_window(app.handle());
+            let show_splash = !start_hidden;
+            let splash = if show_splash {
+                Some(create_splash_window(app.handle()))
+            } else {
+                None
+            };
             let splash_handle = splash.clone();
+            
             let favicon_script = injection::get_favicon_monitor_script();
             let notification_script = injection::get_notification_script();
             
-            WebviewWindowBuilder::new(
+            let mut window_builder = WebviewWindowBuilder::new(
                 app,
                 "main",
                 WebviewUrl::External(GOOGLE_CHAT_URL.parse().unwrap()),
             )
             .title("GoChat")
-            .inner_size(1200.0, 800.0)
-            .center()
+            .position(initial_bounds.x as f64, initial_bounds.y as f64)
+            .inner_size(initial_bounds.width as f64, initial_bounds.height as f64)
             .resizable(true)
             .visible(false)
-            .user_agent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
-            .on_page_load(move |window, _payload| {
-                let _ = window.eval(&favicon_script);
-                let _ = window.eval(&notification_script);
-                let _ = window.show();
-                let _ = window.set_focus();
-                let _ = splash_handle.close();
-            })
-            .on_navigation(move |url| {
-                let url_str = url.as_str();
-                if !is_internal_url(url_str) {
-                    let _ = tauri_plugin_opener::open_url(url_str, None::<&str>);
-                    return false;
-                }
-                true
-            })
-            .build()
-            .expect("Failed to create main window");
+            .user_agent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+
+            if start_maximized {
+                window_builder = window_builder.maximized(true);
+            }
+
+            let start_hidden_clone = start_hidden;
+            window_builder
+                .on_page_load(move |window, _payload| {
+                    let _ = window.eval(&favicon_script);
+                    let _ = window.eval(&notification_script);
+                    
+                    if !start_hidden_clone {
+                        let _ = window.show();
+                        let _ = window.set_focus();
+                    }
+                    
+                    if let Some(splash) = &splash_handle {
+                        let _ = splash.close();
+                    }
+                })
+                .on_navigation(move |url| {
+                    let url_str = url.as_str();
+                    if !is_internal_url(url_str) {
+                        let _ = tauri_plugin_opener::open_url(url_str, None::<&str>);
+                        return false;
+                    }
+                    true
+                })
+                .build()
+                .expect("Failed to create main window");
 
             Ok(())
         })

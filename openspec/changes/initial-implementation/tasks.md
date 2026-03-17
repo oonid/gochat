@@ -39,12 +39,12 @@
 
 ## 6. Window Management
 
-- [ ] 6.1 Implement single instance enforcement using Tauri plugin
-- [ ] 6.2 Save window bounds on close (x, y, width, height)
-- [ ] 6.3 Save and restore maximized state
-- [ ] 6.4 Implement close-to-tray behavior (hide on close button)
-- [ ] 6.5 Add start hidden configuration option
-- [ ] 6.6 Handle second instance with window focus and optional deep link
+- [x] 6.1 Implement single instance enforcement using Tauri plugin
+- [x] 6.2 Save window bounds on close (x, y, width, height)
+- [x] 6.3 Save and restore maximized state
+- [x] 6.4 Implement close-to-tray behavior (hide on close button)
+- [x] 6.5 Add start hidden configuration option
+- [x] 6.6 Handle second instance with window focus and optional deep link
 
 ## 7. External Link Handling
 
