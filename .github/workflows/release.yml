@@ -27,9 +27,15 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: "24"
+          cache: "npm"
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: "src-tauri -> target"
 
       - name: Install Linux dependencies
         run: |
@@ -43,11 +49,13 @@ jobs:
         run: npm run tauri build
 
       - name: Prepare Linux binary
+        if: startsWith(github.ref, 'refs/tags/v')
         run: |
           cd src-tauri/target/release
           tar -czvf gochat-${{ github.ref_name }}-linux-x64.tar.gz gochat
 
       - name: Upload Release Assets
+        if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2.6.1
         with:
           files: |
@@ -80,27 +88,48 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: "24"
+          cache: "npm"
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Setup Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: "src-tauri -> target"
+
       - name: Install dependencies
         run: npm install
 
-      - name: Build Tauri app
-        run: npm run tauri build
-
-      - name: Prepare macOS binary
+      - name: Add Rust targets
         run: |
-          cd src-tauri/target/release
-          zip -r gochat-${{ github.ref_name }}-macos-arm64.zip GoChat.app
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            rustup target add aarch64-apple-darwin x86_64-apple-darwin
+          else
+            rustup target add x86_64-apple-darwin
+          fi
+
+      - name: Build Tauri app
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            npm run tauri build -- --target universal-apple-darwin
+          else
+            npm run tauri build -- --target x86_64-apple-darwin
+          fi
+
+      - name: Prepare macOS binary (Universal)
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          cd src-tauri/target/universal-apple-darwin/release/bundle/macos
+          zip -r ../../gochat-${{ github.ref_name }}-macos-universal.zip GoChat.app
 
       - name: Upload Release Assets
+        if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2.6.1
         with:
           files: |
-            src-tauri/target/release/bundle/dmg/*.dmg
-            src-tauri/target/release/gochat-*-macos-arm64.zip
+            src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg
+            src-tauri/target/universal-apple-darwin/release/gochat-*-macos-universal.zip
           tag_name: ${{ github.ref_name }}
           body: |
             See [docs/auto-update.md](docs/auto-update.md) for release process documentation.
@@ -126,9 +155,15 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: "24"
+          cache: "npm"
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: "src-tauri -> target"
 
       - name: Install dependencies
         run: npm install
@@ -137,11 +172,13 @@ jobs:
         run: npm run tauri build
 
       - name: Prepare Windows binary
+        if: startsWith(github.ref, 'refs/tags/v')
         run: |
           cd src-tauri/target/release
           7z a gochat-${{ github.ref_name }}-windows-x64.zip GoChat.exe
 
       - name: Upload Release Assets
+        if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2.6.1
         with:
           files: |
