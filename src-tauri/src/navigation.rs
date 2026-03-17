@@ -34,6 +34,7 @@ pub fn is_internal_url(url: &str) -> bool {
         || url.starts_with("https://docs.google.com")
         || url.starts_with("https://sheets.google.com")
         || url.starts_with("https://slides.google.com")
+        || url.starts_with("https://ogs.google.com")
 }
 
 pub fn is_internal_url_with_auth(url: &str, third_party_auth_mode: bool) -> bool {
