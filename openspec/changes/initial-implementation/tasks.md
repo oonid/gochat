@@ -32,10 +32,10 @@
 
 ## 5. Desktop Notifications
 
-- [ ] 5.1 Request notification permission on first launch
-- [ ] 5.2 Integrate with Google Chat's notification API
-- [ ] 5.3 Implement click-to-focus on notification click
-- [ ] 5.4 Handle notification permission denied gracefully
+- [x] 5.1 Request notification permission on first launch
+- [x] 5.2 Integrate with Google Chat's notification API
+- [x] 5.3 Implement click-to-focus on notification click
+- [x] 5.4 Handle notification permission denied gracefully
 
 ## 6. Window Management
 

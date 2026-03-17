@@ -1,3 +1,88 @@
+pub fn get_notification_script() -> String {
+    r#"
+(function() {
+    if (window.__gochatNotificationMonitor) return;
+    window.__gochatNotificationMonitor = true;
+
+    function requestNotificationPermission() {
+        if ('Notification' in window) {
+            Notification.requestPermission().then(function(permission) {
+                console.log('GoChat: Notification permission:', permission);
+                if (permission === 'denied') {
+                    if (window.__TAURI__ && window.__TAURI__.event) {
+                        window.__TAURI__.event.emit('notification-permission', { status: 'denied' });
+                    }
+                }
+            });
+        }
+    }
+
+    function interceptNotifications() {
+        const OriginalNotification = window.Notification;
+
+        window.Notification = function(title, options) {
+            if (window.__TAURI__ && window.__TAURI__.event) {
+                window.__TAURI__.event.emit('desktop-notification', {
+                    title: title || '',
+                    body: options?.body || '',
+                    icon: options?.icon || '',
+                    tag: options?.tag || ''
+                });
+            }
+
+            if (OriginalNotification.permission === 'granted') {
+                return new OriginalNotification(title, options);
+            }
+            return null;
+        };
+
+        window.Notification.permission = OriginalNotification.permission;
+        window.Notification.requestPermission = OriginalNotification.requestPermission.bind(OriginalNotification);
+    }
+
+    function monitorDocumentTitle() {
+        let lastTitle = document.title;
+        
+        const titleObserver = new MutationObserver(function() {
+            if (document.title !== lastTitle) {
+                const oldTitle = lastTitle;
+                lastTitle = document.title;
+                
+                if (document.title.includes('(') && document.title.includes(')')) {
+                    const match = document.title.match(/\((\d+)\)/);
+                    if (match) {
+                        if (window.__TAURI__ && window.__TAURI__.event) {
+                            window.__TAURI__.event.emit('unread-count', { count: parseInt(match[1], 10) });
+                        }
+                    }
+                }
+            }
+        });
+
+        titleObserver.observe(document.querySelector('title') || document.documentElement, {
+            childList: true,
+            characterData: true,
+            subtree: true
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            requestNotificationPermission();
+            interceptNotifications();
+            monitorDocumentTitle();
+        });
+    } else {
+        requestNotificationPermission();
+        interceptNotifications();
+        monitorDocumentTitle();
+    }
+
+    console.log('GoChat: Notification monitor initialized');
+})();
+"#.to_string()
+}
+
 pub fn get_favicon_monitor_script() -> String {
     r#"
 (function() {

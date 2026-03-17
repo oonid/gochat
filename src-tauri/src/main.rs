@@ -4,6 +4,7 @@ mod injection;
 mod tray;
 
 use tauri::{Event, Listener, Manager, WebviewUrl, WebviewWindowBuilder};
+use tauri_plugin_notification::NotificationExt;
 use tray::TrayIconState;
 
 const GOOGLE_CHAT_URL: &str = "https://mail.google.com/chat/u/0";
@@ -59,10 +60,52 @@ fn main() {
                     }
                 }
             });
+
+            let app_handle_for_notif = app.handle().clone();
+            app.listen("desktop-notification", move |event: Event| {
+                let payload = event.payload();
+                if let Ok(data) = serde_json::from_str::<serde_json::Value>(payload) {
+                    let title = data.get("title").and_then(|s| s.as_str()).unwrap_or("GoChat");
+                    let body = data.get("body").and_then(|s| s.as_str()).unwrap_or("");
+                    
+                    if let Err(e) = app_handle_for_notif
+                        .notification()
+                        .builder()
+                        .title(title)
+                        .body(body)
+                        .show()
+                    {
+                        eprintln!("Failed to show notification: {}", e);
+                    }
+                }
+            });
+
+            let _app_handle = app.handle().clone();
+            app.listen("notification-permission", move |event: Event| {
+                let payload = event.payload();
+                if let Ok(data) = serde_json::from_str::<serde_json::Value>(payload) {
+                    if data.get("status").and_then(|s| s.as_str()) == Some("denied") {
+                        eprintln!("GoChat: Notification permission denied by user");
+                    }
+                }
+            });
+
+            let app_handle = app.handle().clone();
+            app.listen("unread-count", move |event: Event| {
+                let payload = event.payload();
+                if let Ok(data) = serde_json::from_str::<serde_json::Value>(payload) {
+                    if let Some(count) = data.get("count").and_then(|c| c.as_u64()) {
+                        if count > 0 {
+                            let _ = tray::update_tray_icon(&app_handle, TrayIconState::Badge);
+                        }
+                    }
+                }
+            });
             
             let splash = create_splash_window(app.handle());
             let splash_handle = splash.clone();
             let favicon_script = injection::get_favicon_monitor_script();
+            let notification_script = injection::get_notification_script();
             
             WebviewWindowBuilder::new(
                 app,
@@ -77,6 +120,7 @@ fn main() {
             .user_agent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
             .on_page_load(move |window, _payload| {
                 let _ = window.eval(&favicon_script);
+                let _ = window.eval(&notification_script);
                 let _ = window.show();
                 let _ = window.set_focus();
                 let _ = splash_handle.close();
