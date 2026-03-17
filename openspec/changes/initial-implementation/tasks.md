@@ -56,11 +56,11 @@
 
 ## 8. Third-Party Authentication
 
-- [ ] 8.1 Implement auth mode toggle (regular vs third-party)
-- [ ] 8.2 Create URL whitelist for internal navigation during auth
-- [ ] 8.3 Support `NO_REDIRECT_URL` environment variable
-- [ ] 8.4 Handle app restart when toggling auth mode
-- [ ] 8.5 Test with common SSO providers (Okta, Azure AD, etc.)
+- [x] 8.1 Implement auth mode toggle (regular vs third-party)
+- [x] 8.2 Create URL whitelist for internal navigation during auth
+- [x] 8.3 Support `NO_REDIRECT_URL` environment variable
+- [x] 8.4 Handle app restart when toggling auth mode
+- [x] 8.5 Test with common SSO providers (Okta, Azure AD, etc.)
 
 ## 9. Custom CSS Injection
 

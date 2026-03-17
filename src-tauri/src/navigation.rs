@@ -36,6 +36,18 @@ pub fn is_internal_url(url: &str) -> bool {
         || url.starts_with("https://slides.google.com")
 }
 
+pub fn is_internal_url_with_auth(url: &str, third_party_auth_mode: bool) -> bool {
+    if is_internal_url(url) {
+        return true;
+    }
+
+    if third_party_auth_mode && crate::auth::is_third_party_auth_url(url, true) {
+        return true;
+    }
+
+    false
+}
+
 pub fn process_url_for_navigation(url: &str) -> Option<String> {
     if let Some(cleaned) = clean_google_redirect_url(url) {
         return Some(cleaned);

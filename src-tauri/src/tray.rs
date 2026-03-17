@@ -1,9 +1,12 @@
+use std::sync::Mutex;
 use tauri::{
     image::Image,
     menu::{Menu, MenuItem},
     tray::TrayIconBuilder,
     AppHandle, Manager, Runtime,
 };
+
+use crate::config;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum TrayIconState {
@@ -12,27 +15,19 @@ pub enum TrayIconState {
     Offline,
 }
 
-pub struct TrayState {
-    pub current_icon: TrayIconState,
-    pub auth_mode: bool,
-}
-
-impl Default for TrayState {
-    fn default() -> Self {
-        Self {
-            current_icon: TrayIconState::Normal,
-            auth_mode: false,
-        }
-    }
-}
-
 pub fn build_tray<R: Runtime>(app: &AppHandle<R>) -> Result<(), Box<dyn std::error::Error>> {
+    let config_state = app.state::<Mutex<config::Config>>();
+    let current_auth_mode = config_state.lock().unwrap().third_party_auth_mode;
+
     let show_hide = MenuItem::with_id(app, "show_hide", "Show", true, None::<&str>)?;
     let reload = MenuItem::with_id(app, "reload", "Reload", true, None::<&str>)?;
     let auth_toggle = MenuItem::with_id(
         app,
         "auth_toggle",
-        "Third-party Auth: Off",
+        &format!(
+            "Third-party Auth: {}",
+            if current_auth_mode { "On" } else { "Off" }
+        ),
         true,
         None::<&str>,
     )?;
@@ -45,31 +40,29 @@ pub fn build_tray<R: Runtime>(app: &AppHandle<R>) -> Result<(), Box<dyn std::err
     let _tray = TrayIconBuilder::with_id("main")
         .icon(icon)
         .menu(&menu)
-        .on_menu_event(|app, event| {
-            match event.id.as_ref() {
-                "show_hide" => {
-                    if let Some(window) = app.get_webview_window("main") {
-                        if window.is_visible().unwrap_or(false) {
-                            let _ = window.hide();
-                        } else {
-                            let _ = window.show();
-                            let _ = window.set_focus();
-                        }
+        .on_menu_event(|app, event| match event.id.as_ref() {
+            "show_hide" => {
+                if let Some(window) = app.get_webview_window("main") {
+                    if window.is_visible().unwrap_or(false) {
+                        let _ = window.hide();
+                    } else {
+                        let _ = window.show();
+                        let _ = window.set_focus();
                     }
                 }
-                "reload" => {
-                    if let Some(window) = app.get_webview_window("main") {
-                        let _ = window.eval("window.location.reload()");
-                    }
-                }
-                "auth_toggle" => {
-                    // TODO: implement auth toggle with config persistence
-                }
-                "quit" => {
-                    app.exit(0);
-                }
-                _ => {}
             }
+            "reload" => {
+                if let Some(window) = app.get_webview_window("main") {
+                    let _ = window.eval("window.location.reload()");
+                }
+            }
+            "auth_toggle" => {
+                toggle_auth_mode(app);
+            }
+            "quit" => {
+                app.exit(0);
+            }
+            _ => {}
         })
         .on_tray_icon_event(|tray, event| {
             if let tauri::tray::TrayIconEvent::Click { .. } = event {
@@ -87,6 +80,44 @@ pub fn build_tray<R: Runtime>(app: &AppHandle<R>) -> Result<(), Box<dyn std::err
         .build(app)?;
 
     Ok(())
+}
+
+fn toggle_auth_mode<R: Runtime>(app: &AppHandle<R>) {
+    let config_state = app.state::<Mutex<config::Config>>();
+    let mut cfg = config_state.lock().unwrap();
+    cfg.third_party_auth_mode = !cfg.third_party_auth_mode;
+    let new_mode = cfg.third_party_auth_mode;
+    config::save_config(&cfg);
+    drop(cfg);
+
+    eprintln!(
+        "Third-party auth mode: {}",
+        if new_mode { "ON" } else { "OFF" }
+    );
+
+    if let Some(tray) = app.tray_by_id("main") {
+        let _ = tray.set_menu(Some(build_tray_menu(app, new_mode)));
+    }
+
+    if let Some(window) = app.get_webview_window("main") {
+        let _ = window.eval("window.location.reload()");
+    }
+}
+
+fn build_tray_menu<R: Runtime>(app: &AppHandle<R>, auth_mode: bool) -> Menu<R> {
+    let show_hide = MenuItem::with_id(app, "show_hide", "Show", true, None::<&str>).unwrap();
+    let reload = MenuItem::with_id(app, "reload", "Reload", true, None::<&str>).unwrap();
+    let auth_toggle = MenuItem::with_id(
+        app,
+        "auth_toggle",
+        &format!("Third-party Auth: {}", if auth_mode { "On" } else { "Off" }),
+        true,
+        None::<&str>,
+    )
+    .unwrap();
+    let quit = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>).unwrap();
+
+    Menu::with_items(app, &[&show_hide, &reload, &auth_toggle, &quit]).unwrap()
 }
 
 fn load_tray_icon(state: TrayIconState) -> Result<Image<'static>, Box<dyn std::error::Error>> {

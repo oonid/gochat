@@ -1,5 +1,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod auth;
 mod config;
 mod injection;
 mod navigation;
@@ -31,6 +32,7 @@ fn main() {
     let initial_bounds = config.bounds.clone();
     let start_maximized = config.maximized;
     let start_hidden = config.start_hidden;
+    let third_party_auth_mode = config.third_party_auth_mode;
 
     tauri::Builder::default()
         .plugin(tauri_plugin_notification::init())
@@ -175,7 +177,7 @@ fn main() {
                         return false;
                     }
                     
-                    if !navigation::is_internal_url(url_str) {
+                    if !navigation::is_internal_url_with_auth(url_str, third_party_auth_mode) {
                         let _ = tauri_plugin_opener::open_url(url_str, None::<&str>);
                         return false;
                     }
