@@ -72,11 +72,11 @@
 
 ## 10. Configuration System
 
-- [ ] 10.1 Create config module with JSON file persistence
-- [ ] 10.2 Define configuration schema with defaults
-- [ ] 10.3 Implement config loading on startup
-- [ ] 10.4 Implement config saving on changes and exit
-- [ ] 10.5 Add configuration validation
+- [x] 10.1 Create config module with JSON file persistence
+- [x] 10.2 Define configuration schema with defaults
+- [x] 10.3 Implement config loading on startup
+- [x] 10.4 Implement config saving on changes and exit
+- [x] 10.5 Add configuration validation
 
 ## 11. Auto-Update
 

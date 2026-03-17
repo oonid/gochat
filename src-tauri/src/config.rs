@@ -89,6 +89,20 @@ impl Default for Config {
     }
 }
 
+impl Config {
+    pub fn validate(&mut self) {
+        self.bounds.width = self.bounds.width.clamp(MIN_WINDOW_WIDTH, MAX_WINDOW_WIDTH);
+        self.bounds.height = self
+            .bounds
+            .height
+            .clamp(MIN_WINDOW_HEIGHT, MAX_WINDOW_HEIGHT);
+
+        if !VALID_ICON_THEMES.contains(&self.icon_theme.as_str()) {
+            self.icon_theme = default_icon_theme();
+        }
+    }
+}
+
 fn get_config_path() -> PathBuf {
     let config_dir = dirs::config_dir().unwrap_or_else(|| PathBuf::from("."));
     config_dir.join("gochat").join("config.json")
@@ -99,8 +113,11 @@ pub fn load_config() -> Config {
 
     if path.exists() {
         match fs::read_to_string(&path) {
-            Ok(content) => match serde_json::from_str(&content) {
-                Ok(config) => return config,
+            Ok(content) => match serde_json::from_str::<Config>(&content) {
+                Ok(mut config) => {
+                    config.validate();
+                    return config;
+                }
                 Err(e) => eprintln!("Failed to parse config: {}", e),
             },
             Err(e) => eprintln!("Failed to read config: {}", e),
