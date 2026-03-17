@@ -1,30 +1,16 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Google Chat",
+  "productName": "GoChat",
   "version": "0.1.0",
-  "identifier": "dev.gochat.app",
-  "build": {
-    "beforeDevCommand": "pnpm dev",
-    "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "pnpm build",
-    "frontendDist": "../dist"
-  },
+  "identifier": "id.or.oo.gc",
   "app": {
     "withGlobalTauri": true,
-    "windows": [
-      {
-        "title": "Google Chat",
-        "width": 1200,
-        "height": 800,
-        "resizable": true,
-        "fullscreen": false,
-        "visible": false,
-        "center": true,
-        "url": "https://mail.google.com/chat/u/0"
-      }
-    ],
     "security": {
-      "csp": null
+      "assetProtocol": {
+        "enable": true,
+        "scope": ["$RESOURCE/**", "$CONFIG/**"]
+      },
+      "freezePrototype": true
     },
     "trayIcon": {
       "iconPath": "icons/default/normal.png",
@@ -51,9 +37,5 @@
       }
     }
   },
-  "plugins": {
-    "notification": {
-      "all": true
-    }
-  }
+  "plugins": {}
 }
