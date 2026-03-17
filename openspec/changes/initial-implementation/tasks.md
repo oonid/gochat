@@ -95,11 +95,11 @@
 
 ## 13. Cross-Platform Build
 
-- [ ] 13.1 Configure Linux targets (deb, rpm, AppImage)
-- [ ] 13.2 Configure macOS targets (dmg, app for Intel and ARM)
-- [ ] 13.3 Configure Windows targets (msi, nsis)
-- [ ] 13.4 Set up GitHub Actions for CI/CD
-- [ ] 13.5 Test builds on all platforms
+- [x] 13.1 Configure Linux targets (deb, rpm, AppImage)
+- [x] 13.2 Configure macOS targets (dmg, app for Intel and ARM)
+- [x] 13.3 Configure Windows targets (msi, nsis)
+- [x] 13.4 Set up GitHub Actions for CI/CD
+- [x] 13.5 Test builds on all platforms
 
 ## 14. Documentation and Polish
 

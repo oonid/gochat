@@ -34,6 +34,29 @@
     "linux": {
       "deb": {
         "depends": ["libwebkit2gtk-4.1-0"]
+      },
+      "rpm": {},
+      "appimage": {
+        "bundle": "gochat.AppImage"
+      }
+    },
+    "macOS": {
+      "minimumSystemVersion": "10.13",
+      "entitlements": {
+        "com.apple.security.network.client": true,
+        "com.apple.security.files.user-selected.read-only": true,
+        "com.apple.security.files.downloads.read-only": true
+      }
+    },
+    "windows": {
+      "nsis": {
+        "installerIcon": "icons/icon.ico",
+        "headerImage": "icons/icon.ico",
+        "installMode": "currentUser"
+      },
+      "wix": {
+        "upgradeCode": "4CDA23C8-4B8C4-A5A6-41E5-A4E3-8C65C5-6D17-0A3F-5A7E3-8C",
+        "appUserModelId": "id.or.oo.gc"
       }
     }
   },
