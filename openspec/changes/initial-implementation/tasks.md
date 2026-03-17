@@ -16,19 +16,19 @@
 
 ## 3. System Tray
 
-- [ ] 3.1 Create tray icon with initial state (normal)
-- [ ] 3.2 Build tray context menu (Show/Hide, Reload, Auth toggle, Quit)
-- [ ] 3.3 Implement tray click to toggle window visibility
-- [ ] 3.4 Add three icon states: normal, badge, offline
-- [ ] 3.5 Create icon themes: default, colored, mono
-- [ ] 3.6 Implement dynamic icon switching based on favicon state
+- [x] 3.1 Create tray icon with initial state (normal)
+- [x] 3.2 Build tray context menu (Show/Hide, Reload, Auth toggle, Quit)
+- [x] 3.3 Implement tray click to toggle window visibility
+- [x] 3.4 Add three icon states: normal, badge, offline
+- [x] 3.5 Create icon themes: default, colored, mono
 
 ## 4. Favicon Monitoring
 
 - [ ] 4.1 Create JavaScript injection script for favicon monitoring
 - [ ] 4.2 Implement IPC communication from JS to Rust for favicon changes
 - [ ] 4.3 Add favicon URL pattern matching for icon state determination
-- [ ] 4.4 Handle edge cases (no favicon, loading state, errors)
+- [ ] 4.4 Implement dynamic tray icon switching based on favicon state
+- [ ] 4.5 Handle edge cases (no favicon, loading state, errors)
 
 ## 5. Desktop Notifications
 
