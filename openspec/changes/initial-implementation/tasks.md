@@ -24,11 +24,11 @@
 
 ## 4. Favicon Monitoring
 
-- [ ] 4.1 Create JavaScript injection script for favicon monitoring
-- [ ] 4.2 Implement IPC communication from JS to Rust for favicon changes
-- [ ] 4.3 Add favicon URL pattern matching for icon state determination
-- [ ] 4.4 Implement dynamic tray icon switching based on favicon state
-- [ ] 4.5 Handle edge cases (no favicon, loading state, errors)
+- [x] 4.1 Create JavaScript injection script for favicon monitoring
+- [x] 4.2 Implement IPC communication from JS to Rust for favicon changes
+- [x] 4.3 Add favicon URL pattern matching for icon state determination
+- [x] 4.4 Implement dynamic tray icon switching based on favicon state
+- [x] 4.5 Handle edge cases (no favicon, loading state, errors)
 
 ## 5. Desktop Notifications
 

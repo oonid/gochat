@@ -1,8 +1,10 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod injection;
 mod tray;
 
-use tauri::{Manager, WebviewUrl, WebviewWindowBuilder};
+use tauri::{Event, Listener, Manager, WebviewUrl, WebviewWindowBuilder};
+use tray::TrayIconState;
 
 const GOOGLE_CHAT_URL: &str = "https://mail.google.com/chat/u/0";
 
@@ -43,8 +45,24 @@ fn main() {
         .setup(|app| {
             tray::build_tray(app.handle())?;
             
+            let app_handle = app.handle().clone();
+            app.listen("favicon-changed", move |event: Event| {
+                let payload = event.payload();
+                if let Ok(data) = serde_json::from_str::<serde_json::Value>(payload) {
+                    if let Some(state_str) = data.get("state").and_then(|s| s.as_str()) {
+                        let state = match state_str {
+                            "badge" => TrayIconState::Badge,
+                            "offline" => TrayIconState::Offline,
+                            _ => TrayIconState::Normal,
+                        };
+                        let _ = tray::update_tray_icon(&app_handle, state);
+                    }
+                }
+            });
+            
             let splash = create_splash_window(app.handle());
             let splash_handle = splash.clone();
+            let favicon_script = injection::get_favicon_monitor_script();
             
             WebviewWindowBuilder::new(
                 app,
@@ -58,6 +76,7 @@ fn main() {
             .visible(false)
             .user_agent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
             .on_page_load(move |window, _payload| {
+                let _ = window.eval(&favicon_script);
                 let _ = window.show();
                 let _ = window.set_focus();
                 let _ = splash_handle.close();

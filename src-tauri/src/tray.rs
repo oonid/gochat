@@ -42,7 +42,7 @@ pub fn build_tray<R: Runtime>(app: &AppHandle<R>) -> Result<(), Box<dyn std::err
 
     let icon = load_tray_icon(TrayIconState::Normal)?;
 
-    let tray = TrayIconBuilder::with_id("main")
+    let _tray = TrayIconBuilder::with_id("main")
         .icon(icon)
         .menu(&menu)
         .on_menu_event(|app, event| {
