@@ -27,7 +27,9 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: "24"
-          cache: "npm"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
@@ -43,10 +45,10 @@ jobs:
           sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
 
       - name: Install dependencies
-        run: npm install
+        run: pnpm install
 
       - name: Build Tauri app
-        run: npm run tauri build
+        run: pnpm tauri build
 
       - name: Prepare Linux binary
         if: startsWith(github.ref, 'refs/tags/v')
@@ -88,7 +90,9 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: "24"
-          cache: "npm"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
@@ -99,7 +103,7 @@ jobs:
           workspaces: "src-tauri -> target"
 
       - name: Install dependencies
-        run: npm install
+        run: pnpm install
 
       - name: Add Rust targets
         run: |
@@ -112,9 +116,9 @@ jobs:
       - name: Build Tauri app
         run: |
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            npm run tauri build -- --target universal-apple-darwin
+            pnpm tauri build -- --target universal-apple-darwin
           else
-            npm run tauri build -- --target x86_64-apple-darwin
+            pnpm tauri build -- --target x86_64-apple-darwin
           fi
 
       - name: Prepare macOS binary (Universal)
@@ -155,7 +159,9 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: "24"
-          cache: "npm"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
@@ -166,10 +172,10 @@ jobs:
           workspaces: "src-tauri -> target"
 
       - name: Install dependencies
-        run: npm install
+        run: pnpm install
 
       - name: Build Tauri app
-        run: npm run tauri build
+        run: pnpm tauri build
 
       - name: Prepare Windows binary
         if: startsWith(github.ref, 'refs/tags/v')
