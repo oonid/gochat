@@ -2,6 +2,7 @@
 
 mod config;
 mod injection;
+mod navigation;
 mod tray;
 
 use std::sync::Mutex;
@@ -11,15 +12,6 @@ use tauri_plugin_notification::NotificationExt;
 use tray::TrayIconState;
 
 const GOOGLE_CHAT_URL: &str = "https://mail.google.com/chat/u/0";
-
-fn is_internal_url(url: &str) -> bool {
-    url.starts_with("https://mail.google.com/chat")
-        || url.starts_with("https://chat.google.com")
-        || url.starts_with("https://accounts.google.com")
-        || url.starts_with("https://accounts.youtube.com")
-        || url.starts_with("https://myaccount.google.com")
-        || url.starts_with("https://meet.google.com")
-}
 
 fn create_splash_window(app: &tauri::AppHandle) -> tauri::WebviewWindow {
     WebviewWindowBuilder::new(app, "splash", WebviewUrl::App("index.html".into()))
@@ -172,10 +164,22 @@ fn main() {
                 })
                 .on_navigation(move |url| {
                     let url_str = url.as_str();
-                    if !is_internal_url(url_str) {
+                    
+                    if let Some(processed_url) = navigation::process_url_for_navigation(url_str) {
+                        let _ = tauri_plugin_opener::open_url(&processed_url, None::<&str>);
+                        return false;
+                    }
+                    
+                    if navigation::is_google_meet_link(url_str) {
                         let _ = tauri_plugin_opener::open_url(url_str, None::<&str>);
                         return false;
                     }
+                    
+                    if !navigation::is_internal_url(url_str) {
+                        let _ = tauri_plugin_opener::open_url(url_str, None::<&str>);
+                        return false;
+                    }
+                    
                     true
                 })
                 .build()

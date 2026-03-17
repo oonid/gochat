@@ -48,11 +48,11 @@
 
 ## 7. External Link Handling
 
-- [ ] 7.1 Implement URL scheme detection (internal vs external)
-- [ ] 7.2 Open external URLs in default browser via `shell.open`
-- [ ] 7.3 Clean Google redirect URLs before opening
-- [ ] 7.4 Handle Google Meet links to open in browser
-- [ ] 7.5 Preserve internal navigation within chat.google.com
+- [x] 7.1 Implement URL scheme detection (internal vs external)
+- [x] 7.2 Open external URLs in default browser via `shell.open`
+- [x] 7.3 Clean Google redirect URLs before opening
+- [x] 7.4 Handle Google Meet links to open in browser
+- [x] 7.5 Preserve internal navigation within chat.google.com
 
 ## 8. Third-Party Authentication
 
