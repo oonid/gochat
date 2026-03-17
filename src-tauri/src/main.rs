@@ -174,7 +174,9 @@ fn main() {
             let start_hidden_clone = start_hidden;
             let custom_css_script_clone = custom_css_script.clone();
             window_builder
-                .on_page_load(move |window, _payload| {
+                .on_page_load(move |window, payload| {
+                    eprintln!("[DEBUG] Page loaded: {}", payload.url());
+                    
                     let _ = window.eval(&favicon_script);
                     let _ = window.eval(&notification_script);
                     
@@ -183,32 +185,39 @@ fn main() {
                     }
                     
                     if !start_hidden_clone {
+                        eprintln!("[DEBUG] Showing main window");
                         let _ = window.show();
                         let _ = window.set_focus();
                     }
                     
                     if let Some(splash) = &splash_handle {
+                        eprintln!("[DEBUG] Closing splash window");
                         let _ = splash.close();
                     }
                 })
                 .on_navigation(move |url| {
                     let url_str = url.as_str();
+                    eprintln!("[DEBUG] Navigation to: {}", url_str);
                     
                     if let Some(processed_url) = navigation::process_url_for_navigation(url_str) {
+                        eprintln!("[DEBUG] Opening in browser (redirect): {}", processed_url);
                         let _ = tauri_plugin_opener::open_url(&processed_url, None::<&str>);
                         return false;
                     }
                     
                     if navigation::is_google_meet_link(url_str) {
+                        eprintln!("[DEBUG] Opening Meet in browser: {}", url_str);
                         let _ = tauri_plugin_opener::open_url(url_str, None::<&str>);
                         return false;
                     }
                     
                     if !navigation::is_internal_url_with_auth(url_str, third_party_auth_mode) {
+                        eprintln!("[DEBUG] Opening external in browser: {}", url_str);
                         let _ = tauri_plugin_opener::open_url(url_str, None::<&str>);
                         return false;
                     }
                     
+                    eprintln!("[DEBUG] Allowing navigation: {}", url_str);
                     true
                 })
                 .build()
