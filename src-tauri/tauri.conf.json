@@ -59,12 +59,7 @@
       "pubkey": "RWRoQDbnXS+chrbwZ6HsVkQ6LTENIOJFsaFhOaKfkvnrGu1FMs9PChy2"
     },
     "deep-link": {
-      "desktop": {
-        "schemes": ["gchat"]
-      },
-      "mobile": {
-        "schemes": ["gchat"]
-      }
+      "schemes": ["gchat"]
     }
   }
 }
