@@ -16,7 +16,7 @@
         "enable": true,
         "scope": ["$RESOURCE/**", "$CONFIG/**"]
       },
-      "freezePrototype": true
+      "freezePrototype": false
     },
     "trayIcon": {
       "iconPath": "icons/default/normal.png",

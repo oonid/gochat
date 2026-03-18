@@ -157,6 +157,7 @@ fn main() {
 
             let start_hidden_clone = start_hidden;
             let custom_css_script_clone = custom_css_script.clone();
+            let window_shown_clone = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
             
             window_builder
                 .on_page_load(move |window, payload| {
@@ -167,16 +168,20 @@ fn main() {
                     // let _ = window.eval(&notification_script);
                     eprintln!("[INFO] on_page_load: notification script SKIPPED");
                     
-                    if let Some(css_script) = &custom_css_script_clone {
-                        let _ = window.eval(css_script);
-                        eprintln!("[INFO] on_page_load: custom CSS injected");
-                    }
+                    // TEMPORARILY DISABLED - debugging freeze
+                    // if let Some(css_script) = &custom_css_script_clone {
+                    //     let _ = window.eval(css_script);
+                    // }
+                    eprintln!("[INFO] on_page_load: custom CSS SKIPPED");
                     
-                    if !start_hidden_clone {
-                        eprintln!("[INFO] on_page_load: showing window...");
+                    if !start_hidden_clone && !window_shown_clone.load(std::sync::atomic::Ordering::SeqCst) {
+                        window_shown_clone.store(true, std::sync::atomic::Ordering::SeqCst);
+                        eprintln!("[INFO] on_page_load: showing window (first time)...");
                         let _ = window.show();
                         let _ = window.set_focus();
                         eprintln!("[INFO] on_page_load: window shown and focused");
+                    } else if !start_hidden_clone {
+                        eprintln!("[INFO] on_page_load: window already shown, skipping");
                     }
                 })
                 .on_navigation(move |url| {
