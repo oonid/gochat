@@ -8,18 +8,10 @@ mod tray;
 mod updater;
 
 use std::sync::Mutex;
-use std::io::Write;
 
 use tauri::{Event, Listener, Manager, WebviewUrl, WebviewWindowBuilder};
 use tauri_plugin_notification::NotificationExt;
 use tray::TrayIconState;
-
-macro_rules! debug {
-    ($($arg:tt)*) => {{
-        eprintln!($($arg)*);
-        let _ = std::io::stderr().flush();
-    }};
-}
 
 const GOOGLE_CHAT_URL: &str = "https://mail.google.com/chat/u/0";
 
@@ -135,7 +127,6 @@ fn main() {
                 }
             });
             
-            debug!("[DEBUG] Preparing scripts...");
             let favicon_script = injection::get_favicon_monitor_script();
             let notification_script = injection::get_notification_script();
             let custom_css = config::load_custom_css();
@@ -153,7 +144,7 @@ fn main() {
             .inner_size(initial_bounds.width as f64, initial_bounds.height as f64)
             .resizable(true)
             .visible(false)
-            .devtools(true);
+            .devtools(cfg!(debug_assertions));
 
             if start_maximized {
                 window_builder = window_builder.maximized(true);
@@ -178,8 +169,10 @@ fn main() {
                 })
                 .on_navigation(move |url| {
                     let url_str = url.as_str();
+                    eprintln!("[INFO] on_navigation: {}", url_str);
                     
                     if let Some(processed_url) = navigation::process_url_for_navigation(url_str) {
+                        eprintln!("[INFO] on_navigation: opening redirect in browser: {}", processed_url);
                         let url_to_open = processed_url.clone();
                         std::thread::spawn(move || {
                             let _ = tauri_plugin_opener::open_url(&url_to_open, None::<&str>);
@@ -188,6 +181,7 @@ fn main() {
                     }
                     
                     if navigation::is_google_meet_link(url_str) {
+                        eprintln!("[INFO] on_navigation: opening Meet in browser: {}", url_str);
                         let url_to_open = url_str.to_string();
                         std::thread::spawn(move || {
                             let _ = tauri_plugin_opener::open_url(&url_to_open, None::<&str>);
@@ -196,6 +190,7 @@ fn main() {
                     }
                     
                     if !navigation::is_internal_url_with_auth(url_str, third_party_auth_mode) {
+                        eprintln!("[INFO] on_navigation: opening external in browser: {}", url_str);
                         let url_to_open = url_str.to_string();
                         std::thread::spawn(move || {
                             let _ = tauri_plugin_opener::open_url(&url_to_open, None::<&str>);
