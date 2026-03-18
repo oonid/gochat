@@ -24,11 +24,42 @@ pub fn is_google_meet_link(url: &str) -> bool {
     url.starts_with("https://meet.google.com/") || url.contains("meet.google.com")
 }
 
-        || url.starts_with("https://ogs.google.com")
-        || url.starts_with("https://ssl.google.com")
-        || url.starts_with("https://workspace.google.com")
-}
-    true
+pub fn is_internal_url(url: &str) -> bool {
+    if url == "about:blank" {
+        return true;
+    }
+
+    let google_domains = [
+        "https://mail.google.com",
+        "https://chat.google.com",
+        "https://accounts.google.com",
+        "https://accounts.youtube.com",
+        "https://myaccount.google.com",
+        "https://drive.google.com",
+        "https://docs.google.com",
+        "https://sheets.google.com",
+        "https://slides.google.com",
+        "https://ogs.google.com",
+        "https://ssl.google.com",
+        "https://workspace.google.com",
+        "https://studio.workspace.google.com",
+        "https://contacts.google.com",
+        "https://calendar.google.com",
+        "https://meet.google.com",
+        "https://hangouts.google.com",
+        "https://plus.google.com",
+        "https://photos.google.com",
+        "https://maps.google.com",
+        "https://www.google.com",
+        "https://google.com",
+    ];
+
+    for domain in &google_domains {
+        if url.starts_with(domain) {
+            return true;
+        }
+    }
+    false
 }
 
 pub fn is_internal_url_with_auth(url: &str, third_party_auth_mode: bool) -> bool {

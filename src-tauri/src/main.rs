@@ -8,10 +8,18 @@ mod tray;
 mod updater;
 
 use std::sync::Mutex;
+use std::io::Write;
 
 use tauri::{Event, Listener, Manager, WebviewUrl, WebviewWindowBuilder};
 use tauri_plugin_notification::NotificationExt;
 use tray::TrayIconState;
+
+macro_rules! debug {
+    ($($arg:tt)*) => {{
+        eprintln!($($arg)*);
+        let _ = std::io::stderr().flush();
+    }};
+}
 
 const GOOGLE_CHAT_URL: &str = "https://mail.google.com/chat/u/0";
 
@@ -127,8 +135,7 @@ fn main() {
                 }
             });
             
-            let splash_handle = None;
-            
+            debug!("[DEBUG] Preparing scripts...");
             let favicon_script = injection::get_favicon_monitor_script();
             let notification_script = injection::get_notification_script();
             let custom_css = config::load_custom_css();
@@ -155,58 +162,48 @@ fn main() {
 
             let start_hidden_clone = start_hidden;
             let custom_css_script_clone = custom_css_script.clone();
-            let error_logging_script = r#"
-(function() {
-    window.addEventListener('error', function(e) {
-        console.error('[GOCHAT JS ERROR]', e.message, e.filename, e.lineno);
-    });
-    window.addEventListener('unhandledrejection', function(e) {
-        console.error('[GOCHAT PROMISE ERROR]', e.reason);
-    });
-})();
-"#.to_string();
             
             window_builder
-                .on_page_load(move |window, payload| {
-                    eprintln!("[DEBUG] Page loaded: {}", payload.url());
-                    
-                    // TEMPORARILY DISABLE INJECTION TO DEBUG FREEZE
-                    // let _ = window.eval(&favicon_script);
-                    // let _ = window.eval(&notification_script);
+                .on_page_load(move |window, _payload| {
+                    let _ = window.eval(&favicon_script);
+                    let _ = window.eval(&notification_script);
                     
                     if let Some(css_script) = &custom_css_script_clone {
                         let _ = window.eval(css_script);
                     }
                     
                     if !start_hidden_clone {
-                        eprintln!("[DEBUG] Showing main window");
                         let _ = window.show();
                         let _ = window.set_focus();
                     }
                 })
                 .on_navigation(move |url| {
                     let url_str = url.as_str();
-                    eprintln!("[DEBUG] Navigation to: {}", url_str);
                     
                     if let Some(processed_url) = navigation::process_url_for_navigation(url_str) {
-                        eprintln!("[DEBUG] Opening in browser (redirect): {}", processed_url);
-                        let _ = tauri_plugin_opener::open_url(&processed_url, None::<&str>);
+                        let url_to_open = processed_url.clone();
+                        std::thread::spawn(move || {
+                            let _ = tauri_plugin_opener::open_url(&url_to_open, None::<&str>);
+                        });
                         return false;
                     }
                     
                     if navigation::is_google_meet_link(url_str) {
-                        eprintln!("[DEBUG] Opening Meet in browser: {}", url_str);
-                        let _ = tauri_plugin_opener::open_url(url_str, None::<&str>);
+                        let url_to_open = url_str.to_string();
+                        std::thread::spawn(move || {
+                            let _ = tauri_plugin_opener::open_url(&url_to_open, None::<&str>);
+                        });
                         return false;
                     }
                     
                     if !navigation::is_internal_url_with_auth(url_str, third_party_auth_mode) {
-                        eprintln!("[DEBUG] Opening external in browser: {}", url_str);
-                        let _ = tauri_plugin_opener::open_url(url_str, None::<&str>);
+                        let url_to_open = url_str.to_string();
+                        std::thread::spawn(move || {
+                            let _ = tauri_plugin_opener::open_url(&url_to_open, None::<&str>);
+                        });
                         return false;
                     }
                     
-                    eprintln!("[DEBUG] Allowing navigation: {}", url_str);
                     true
                 })
                 .build()
