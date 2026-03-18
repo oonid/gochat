@@ -16,14 +16,17 @@ use tray::TrayIconState;
 const GOOGLE_CHAT_URL: &str = "https://mail.google.com/chat/u/0";
 
 fn main() {
+    eprintln!("[INFO] main: starting...");
     config::create_custom_css_template();
 
     let config = config::load_config();
+    eprintln!("[INFO] main: config loaded");
     let initial_bounds = config.bounds.clone();
     let start_maximized = config.maximized;
     let start_hidden = config.start_hidden;
     let third_party_auth_mode = config.third_party_auth_mode;
 
+    eprintln!("[INFO] main: starting tauri builder...");
     tauri::Builder::default()
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
@@ -56,7 +59,9 @@ fn main() {
             }
         })
         .setup(move |app| {
+            eprintln!("[INFO] setup: starting...");
             tray::build_tray(app.handle())?;
+            eprintln!("[INFO] setup: tray built");
             
             let auto_update_enabled = {
                 let config_state = app.state::<Mutex<config::Config>>();
@@ -154,17 +159,23 @@ fn main() {
             let custom_css_script_clone = custom_css_script.clone();
             
             window_builder
-                .on_page_load(move |window, _payload| {
+                .on_page_load(move |window, payload| {
+                    eprintln!("[INFO] on_page_load: {:?}", payload.url());
                     let _ = window.eval(&favicon_script);
+                    eprintln!("[INFO] on_page_load: favicon script injected");
                     let _ = window.eval(&notification_script);
+                    eprintln!("[INFO] on_page_load: notification script injected");
                     
                     if let Some(css_script) = &custom_css_script_clone {
                         let _ = window.eval(css_script);
+                        eprintln!("[INFO] on_page_load: custom CSS injected");
                     }
                     
                     if !start_hidden_clone {
+                        eprintln!("[INFO] on_page_load: showing window...");
                         let _ = window.show();
                         let _ = window.set_focus();
+                        eprintln!("[INFO] on_page_load: window shown and focused");
                     }
                 })
                 .on_navigation(move |url| {
@@ -202,6 +213,8 @@ fn main() {
                 })
                 .build()
                 .expect("Failed to create main window");
+
+            eprintln!("[INFO] setup: window created, setup complete");
 
             Ok(())
         })
