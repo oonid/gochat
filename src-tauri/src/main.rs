@@ -189,22 +189,20 @@ fn main() {
                 .on_page_load(move |window, payload| {
                     eprintln!("[DEBUG] Page loaded: {}", payload.url());
                     
-                    let _ = window.eval(&error_logging_script);
-                    let _ = window.eval(&favicon_script);
-                    let _ = window.eval(&notification_script);
+                    // TEMPORARILY DISABLE INJECTION TO DEBUG FREEZE
+                    // let _ = window.eval(&favicon_script);
+                    // let _ = window.eval(&notification_script);
                     
                     if let Some(css_script) = &custom_css_script_clone {
                         let _ = window.eval(css_script);
                     }
                     
                     if !start_hidden_clone {
-                        eprintln!("[DEBUG] Showing main window");
                         let _ = window.show();
                         let _ = window.set_focus();
                     }
                     
                     if let Some(splash) = &splash_handle {
-                        eprintln!("[DEBUG] Closing splash window");
                         let _ = splash.close();
                     }
                 })
