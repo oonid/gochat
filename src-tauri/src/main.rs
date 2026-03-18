@@ -15,19 +15,6 @@ use tray::TrayIconState;
 
 const GOOGLE_CHAT_URL: &str = "https://mail.google.com/chat/u/0";
 
-fn create_splash_window(app: &tauri::AppHandle) -> tauri::WebviewWindow {
-    WebviewWindowBuilder::new(app, "splash", WebviewUrl::App("index.html".into()))
-        .title("GoChat")
-        .inner_size(400.0, 300.0)
-        .center()
-        .resizable(false)
-        .decorations(false)
-        .always_on_top(true)
-        .skip_taskbar(true)
-        .build()
-        .expect("Failed to create splash window")
-}
-
 fn main() {
     config::create_custom_css_template();
 
@@ -140,13 +127,7 @@ fn main() {
                 }
             });
             
-            let show_splash = !start_hidden;
-            let splash = if show_splash {
-                Some(create_splash_window(app.handle()))
-            } else {
-                None
-            };
-            let splash_handle = splash.clone();
+            let splash_handle = None;
             
             let favicon_script = injection::get_favicon_monitor_script();
             let notification_script = injection::get_notification_script();
@@ -198,12 +179,9 @@ fn main() {
                     }
                     
                     if !start_hidden_clone {
+                        eprintln!("[DEBUG] Showing main window");
                         let _ = window.show();
                         let _ = window.set_focus();
-                    }
-                    
-                    if let Some(splash) = &splash_handle {
-                        let _ = splash.close();
                     }
                 })
                 .on_navigation(move |url| {
