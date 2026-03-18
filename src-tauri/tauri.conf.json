@@ -28,7 +28,7 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "category": "Network",
+    "category": "SocialNetworking",
     "shortDescription": "Google Chat Desktop Client",
     "longDescription": "A lightweight desktop client for Google Chat built with Tauri v2",
     "linux": {
