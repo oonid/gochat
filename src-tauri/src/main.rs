@@ -161,10 +161,11 @@ fn main() {
             window_builder
                 .on_page_load(move |window, payload| {
                     eprintln!("[INFO] on_page_load: {:?}", payload.url());
-                    let _ = window.eval(&favicon_script);
-                    eprintln!("[INFO] on_page_load: favicon script injected");
-                    let _ = window.eval(&notification_script);
-                    eprintln!("[INFO] on_page_load: notification script injected");
+                    // TEMPORARILY DISABLED - debugging freeze
+                    // let _ = window.eval(&favicon_script);
+                    eprintln!("[INFO] on_page_load: favicon script SKIPPED");
+                    // let _ = window.eval(&notification_script);
+                    eprintln!("[INFO] on_page_load: notification script SKIPPED");
                     
                     if let Some(css_script) = &custom_css_script_clone {
                         let _ = window.eval(css_script);
