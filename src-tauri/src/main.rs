@@ -183,7 +183,7 @@ fn main() {
                     eprintln!("[INFO] on_navigation: {}", url_str);
                     
                     if let Some(processed_url) = navigation::process_url_for_navigation(url_str) {
-                        eprintln!("[INFO] on_navigation: opening redirect in browser: {}", processed_url);
+                        eprintln!("[INFO] on_navigation: BLOCKED (redirect) -> opening in browser: {}", processed_url);
                         let url_to_open = processed_url.clone();
                         std::thread::spawn(move || {
                             let _ = tauri_plugin_opener::open_url(&url_to_open, None::<&str>);
@@ -192,7 +192,7 @@ fn main() {
                     }
                     
                     if navigation::is_google_meet_link(url_str) {
-                        eprintln!("[INFO] on_navigation: opening Meet in browser: {}", url_str);
+                        eprintln!("[INFO] on_navigation: BLOCKED (meet) -> opening in browser: {}", url_str);
                         let url_to_open = url_str.to_string();
                         std::thread::spawn(move || {
                             let _ = tauri_plugin_opener::open_url(&url_to_open, None::<&str>);
@@ -201,7 +201,7 @@ fn main() {
                     }
                     
                     if !navigation::is_internal_url_with_auth(url_str, third_party_auth_mode) {
-                        eprintln!("[INFO] on_navigation: opening external in browser: {}", url_str);
+                        eprintln!("[INFO] on_navigation: BLOCKED (external) -> opening in browser: {}", url_str);
                         let url_to_open = url_str.to_string();
                         std::thread::spawn(move || {
                             let _ = tauri_plugin_opener::open_url(&url_to_open, None::<&str>);
@@ -209,6 +209,7 @@ fn main() {
                         return false;
                     }
                     
+                    eprintln!("[INFO] on_navigation: ALLOWED: {}", url_str);
                     true
                 })
                 .build()
