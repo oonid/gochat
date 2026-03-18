@@ -13,3 +13,6 @@ src-tauri/target/
 
 # Build artifacts
 *.log
+
+# Signing keys (keep private!)
+/.tauri/
