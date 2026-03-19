@@ -1,6 +1,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use tauri::{Manager, WebviewUrl, WebviewWindowBuilder};
+use tauri::Manager;
 
 const GOOGLE_CHAT_URL: &str = "https://mail.google.com/chat/u/0";
 
@@ -11,10 +11,15 @@ fn is_internal_url(url: &str) -> bool {
         || url.starts_with("https://accounts.youtube.com")
         || url.starts_with("https://myaccount.google.com")
         || url.starts_with("https://meet.google.com")
+        || url.starts_with("https://ogs.google.com")
+        || url.starts_with("https://www.google.com")
+        || url.starts_with("https://google.com")
+        || url.starts_with("https://contacts.google.com")
+        || url.starts_with("https://studio.workspace.google.com")
 }
 
 fn create_splash_window(app: &tauri::AppHandle) -> tauri::WebviewWindow {
-    WebviewWindowBuilder::new(app, "splash", WebviewUrl::App("index.html".into()))
+    tauri::WebviewWindowBuilder::new(app, "splash", tauri::WebviewUrl::App("index.html".into()))
         .title("GoChat")
         .inner_size(400.0, 300.0)
         .center()
@@ -42,17 +47,16 @@ fn main() {
             let splash = create_splash_window(app.handle());
             let splash_handle = splash.clone();
 
-            WebviewWindowBuilder::new(
+            let _main_window = tauri::WebviewWindowBuilder::new(
                 app,
                 "main",
-                WebviewUrl::External(GOOGLE_CHAT_URL.parse().unwrap()),
+                tauri::WebviewUrl::External(GOOGLE_CHAT_URL.parse().unwrap()),
             )
             .title("GoChat")
             .inner_size(1200.0, 800.0)
             .center()
             .resizable(true)
             .visible(false)
-            .user_agent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
             .on_page_load(move |window, _payload| {
                 let _ = window.show();
                 let _ = window.set_focus();
@@ -60,11 +64,12 @@ fn main() {
             })
             .on_navigation(move |url| {
                 let url_str = url.as_str();
-                if !is_internal_url(url_str) {
+                if is_internal_url(url_str) {
+                    true
+                } else {
                     let _ = tauri_plugin_opener::open_url(url_str, None::<&str>);
-                    return false;
+                    false
                 }
-                true
             })
             .build()
             .expect("Failed to create main window");

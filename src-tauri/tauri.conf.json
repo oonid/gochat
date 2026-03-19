@@ -11,12 +11,9 @@
   },
   "app": {
     "withGlobalTauri": true,
+    "windows": [],
     "security": {
-      "assetProtocol": {
-        "enable": true,
-        "scope": ["$RESOURCE/**", "$CONFIG/**"]
-      },
-      "freezePrototype": true
+      "csp": null
     },
     "trayIcon": {
       "iconPath": "icons/default/normal.png",

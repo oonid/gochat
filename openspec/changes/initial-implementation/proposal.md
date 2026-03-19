@@ -38,7 +38,7 @@ Build a complete Google Chat desktop client from scratch using Tauri v2:
 **New Dependencies**:
 - Tauri v2.x runtime
 - Rust 1.70+ for backend
-- Node.js 18+ for frontend tooling (Vite)
+- Node.js 18+ for frontend tooling (Vite) — run via Docker using `scripts/dpnpm.sh`
 
 **Target Platforms**:
 - Linux (x64, arm64) - .deb, .rpm, AppImage

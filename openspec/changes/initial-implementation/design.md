@@ -130,6 +130,17 @@ src-tauri/icons/
 
 **Alternative Considered**: Watch file for changes and hot-reload. Deferred - simple reload is sufficient for MVP.
 
+### D7: Docker-based Development
+
+**Rationale**: Use Docker to run Node.js/pnpm instead of requiring local Node.js installation. All frontend tooling runs via `scripts/dpnpm.sh` which wraps pnpm commands in a `node:20-bookworm-slim` container with persistent pnpm store volume.
+
+**Workflow**:
+- `./scripts/dpnpm.sh install` - Install dependencies
+- `./scripts/dpnpm.sh build` - Build frontend
+- `./scripts/dev.sh` - Run full dev environment (vite + tauri)
+
+**Alternative Considered**: Require local Node.js installation. Rejected to simplify developer setup and ensure consistent Node.js version across environments.
+
 ## Risks / Trade-offs
 
 ### R1: Google may break favicon patterns → Mitigation
