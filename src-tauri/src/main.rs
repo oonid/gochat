@@ -19,6 +19,8 @@ fn is_internal_url(url: &str) -> bool {
         || url.starts_with("https://google.com")
         || url.starts_with("https://contacts.google.com")
         || url.starts_with("https://studio.workspace.google.com")
+        || url.starts_with("https://calendar.google.com")
+        || url.starts_with("https://tasks.google.com")
 }
 
 fn create_splash_window(app: &tauri::AppHandle) -> tauri::WebviewWindow {
