@@ -5,6 +5,9 @@ use tauri::Manager;
 const GOOGLE_CHAT_URL: &str = "https://mail.google.com/chat/u/0";
 
 fn is_internal_url(url: &str) -> bool {
+    if url == "about:blank" {
+        return true;
+    }
     url.starts_with("https://mail.google.com/chat")
         || url.starts_with("https://chat.google.com")
         || url.starts_with("https://accounts.google.com")
