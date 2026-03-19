@@ -1,5 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod tray;
+
 use tauri::Manager;
 
 const GOOGLE_CHAT_URL: &str = "https://mail.google.com/chat/u/0";
@@ -49,6 +51,8 @@ fn main() {
         .plugin(tauri_plugin_persisted_scope::init())
         .plugin(tauri_plugin_opener::init())
         .setup(|app| {
+            tray::build_tray(app.handle())?;
+
             let splash = create_splash_window(app.handle());
             let splash_handle = splash.clone();
 
