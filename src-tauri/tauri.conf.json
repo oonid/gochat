@@ -51,9 +51,4 @@
       }
     }
   },
-  "plugins": {
-    "notification": {
-      "all": true
-    }
-  }
 }
