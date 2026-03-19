@@ -4,27 +4,19 @@
   "version": "0.1.5",
   "identifier": "id.or.oo.gochat",
   "build": {
-    "beforeDevCommand": "pnpm dev",
+    "beforeDevCommand": "./scripts/before-dev.sh",
     "devUrl": "http://localhost:1420",
     "beforeBuildCommand": "pnpm build",
     "frontendDist": "../dist"
   },
   "app": {
     "withGlobalTauri": true,
-    "windows": [
-      {
-        "title": "Google Chat",
-        "width": 1200,
-        "height": 800,
-        "resizable": true,
-        "fullscreen": false,
-        "visible": false,
-        "center": true,
-        "url": "https://mail.google.com/chat/u/0"
-      }
-    ],
     "security": {
-      "csp": null
+      "assetProtocol": {
+        "enable": true,
+        "scope": ["$RESOURCE/**", "$CONFIG/**"]
+      },
+      "freezePrototype": true
     },
     "trayIcon": {
       "iconPath": "icons/default/normal.png",

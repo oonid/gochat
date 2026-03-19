@@ -8,11 +8,11 @@
 
 ## 2. Core Window and WebView
 
-- [ ] 2.1 Configure main window to load `https://mail.google.com/chat/u/0`
-- [ ] 2.2 Set up window title, icon, and initial dimensions (1200x800)
-- [ ] 2.3 Implement window show/hide on ready-to-show event
-- [ ] 2.4 Configure webview security settings (CSP, allowed domains)
-- [ ] 2.5 Add loading screen/splash while Google Chat loads
+- [x] 2.1 Configure main window to load `https://mail.google.com/chat/u/0`
+- [x] 2.2 Set up window title, icon, and initial dimensions (1200x800)
+- [x] 2.3 Implement window show/hide on ready-to-show event
+- [x] 2.4 Configure webview security settings (CSP, allowed domains)
+- [x] 2.5 Add loading screen/splash while Google Chat loads
 
 ## 3. System Tray
 
